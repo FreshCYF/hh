@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{padding: 0; margin: 0;}
+			.smallBox{position: relative;width: 400px;margin: 100px auto;background: red;}
+			.smallBox img{width: 100%;display: block;}
+			.smallBox span{display: block;position: absolute;opacity: 0.3;background:yellow;left: 0;top: 0;z-index: 5;}
+			.bigBox{position: absolute;overflow: hidden;}
+			.bigBox img{position: absolute;}
+			.imgList{margin: 10px auto;width: 220px;list-style: none;}
+			.imgList li{float: left;width: 100px;margin-right: 10px;}
+			.imgList li img{width: 100%;display: block;}
+		</style>
+		<script type="text/javascript" src="../js/jquery-1.12.3.js" ></script>
+		<script type="text/javascript">
+			$(function(){
+				//小图的盒子
+				var $smallBox=$(".smallBox");
+				//小图
+				var $smallImg=$(".smallBox img");
+				
+				var $smallTop; //小图盒子距离顶部的距离
+				var $smallLeft; // 小图盒子距离左边的距离
+				var $smallWidth; //小图的宽度
+				var $smallHeight; //小图的高度
+				
+				//当小图加载完毕  获取其宽度 距离顶部的距离 距离左边的距离
+				$smallImg.load(function(){
+					
+					$smallTop=$smallBox.offset().top;
+					$smallLeft=$smallBox.offset().left;
+					$smallWidth=$smallImg.width();
+					$smallHeight=$smallImg.height();
+					
+					//将大图盒子插入到body中去
+					$bigBox.appendTo("body");
+					//设置大图盒子的位置以及大小
+					$bigBox.css({
+						top:$smallTop,
+						left:$smallLeft+$smallWidth+50,
+						width:$smallWidth,
+						height:$smallHeight
+					});
+				});
+				
+				//创建大图的盒子
+				var $bigBox=$("<div/>").addClass("bigBox");
+				
+				//小图与大图的比例
+				var ratio;
+				
+				//鼠标移入
+				$smallBox.mouseenter(function(){
+					//生成一个放大镜
+					var $span=$("<span/>");
+					//加到小图盒子中去
+					$span.appendTo($smallBox);
+					//每次移出清除大图盒子里的图片
+					$bigBox.html("");
+					
+					//获取当前图片的src
+					var $imgSrc=$(this).find("img").attr("src");
+					//生成大图片 插入大图盒子
+					var $bigImg=$("<img/>").attr("src",$imgSrc).appendTo($bigBox);
+					//大图与小图的比例
+					ratio = $bigImg.width()/$smallWidth;
+					
+					$smallBox.mousemove(function(e){
+						//获取当前鼠标的位置(一般鼠标的位置放大镜的中间位置)
+						var eTop=e.clientY-$smallTop-$span.outerHeight()/2;
+						var eLeft=e.clientX-$smallLeft-$span.outerWidth()/2;
+						console.log(eTop,eLeft);
+						//判断是否移出边界
+						if(eLeft<=0){
+							eLeft=0;
+						}else if(eLeft>( $smallBox.outerWidth()-$span.outerWidth() ) ){
+							eLeft=$smallBox.outerWidth()-$span.outerWidth();
+						}
+						if(eTop<=0){
+							eTop=0;
+						}else if(eTop>( $smallBox.outerHeight()-$span.outerHeight() )){
+							eTop=$smallBox.outerHeight()-$span.outerHeight();
+						}
+						
+						//放大镜的移动
+						$span.css({
+							height:$smallHeight/ratio,
+							width:$smallWidth/ratio,
+							left:eLeft,
+							top:eTop
+						})
+						
+						//大图的移动
+						$bigImg.css({
+							top:-eTop*ratio,
+							left:-eLeft*ratio
+						})
+						
+					}).mouseleave(function(){   //鼠标移出
+						//清除放大镜
+						$span.remove();
+						//每次移出清除大图盒子里的图片
+						$bigBox.html("");
+						
+					});
+					
+					
+				});
+				
+				//切换图片
+				var $lImg=$(".imgList img");
+				$lImg.mouseenter(function(){
+					var $src=$(this).attr("src");
+					$smallImg.attr("src",$src);
+				})
+				
+			});
+		</script>
+	</head>
+	
+	
+	
+	
+	
+	<body>
+		
+		<div class="smallBox">
+			<img src="../img/12.jpg"/>
+		</div>
+		<ul class="imgList">
+			<li><img src="../img/5.jpg"/></li>
+			<li><img src="../img/12.jpg"/></li>
+		</ul>
+	</body>
+</html>
